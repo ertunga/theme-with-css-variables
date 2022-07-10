@@ -16,8 +16,12 @@ export class AppComponent implements OnInit {
 
   ngOnInit(): void {
     const theme = localStorage.getItem('theme');
-    this.themeService.set(theme || 'light');
-
+    if (theme && this.themeService.themeNames.includes(theme)) {
+      this.themeService.set(theme);
+    } else {
+      this.themeService.set('light');
+    }
+  
     this.themeService.activeTheme$.pipe(tap(console.log)).subscribe(themeName => localStorage.setItem('theme', themeName));
   }
 }
