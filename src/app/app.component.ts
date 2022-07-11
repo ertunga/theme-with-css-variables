@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
-import { tap } from 'rxjs';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { filter, Subscriber, Subscription, tap } from 'rxjs';
 import { ThemeService } from './theme.service';
 
 @Component({
@@ -10,7 +10,9 @@ import { ThemeService } from './theme.service';
   standalone: true,
   imports: [CommonModule]
 })
-export class AppComponent implements OnInit {
+export class AppComponent implements OnInit, OnDestroy {
+
+  private activeThemeSub = Subscription.EMPTY;
 
   constructor(protected themeService: ThemeService) {}
 
@@ -22,6 +24,10 @@ export class AppComponent implements OnInit {
       this.themeService.set('light');
     }
   
-    this.themeService.activeTheme$.pipe(tap(console.log)).subscribe(themeName => localStorage.setItem('theme', themeName));
+    this.activeThemeSub = this.themeService.activeTheme$.pipe(filter(Boolean)).subscribe(themeName => localStorage.setItem('theme', themeName));
+  }
+
+  ngOnDestroy(): void {
+      this.activeThemeSub.unsubscribe();
   }
 }
